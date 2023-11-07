@@ -3,7 +3,9 @@ import { StockList } from "../components/StockList";
 export const StockOverviewPage = () => {
   return (
     <div>
-      StockOverviewPage
+      <div className="container">
+        <h2 className="mt-5 text-center">Rav Stocks</h2>
+      </div>
       <AutoComplete />
       <StockList />
     </div>

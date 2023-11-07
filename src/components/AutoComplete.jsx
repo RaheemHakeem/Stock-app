@@ -1,53 +1,7 @@
-import { useEffect, useState } from "react";
-import finnHub from "../apis/finnHub";
+import { useGlobalContext } from "../contexts/WatchListContext";
 
 export const AutoComplete = () => {
-  const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
-
-  const renderDropDown = () => {
-    const dropDownClass = search ? "show" : null;
-    return (
-      <ul
-        style={{
-          maxHeight: "500px",
-          overflowY: "scroll",
-          overflowX: "hidden",
-          cursor: "pointer",
-        }}
-        className={`dropdown-menu ${dropDownClass}`}
-      >
-        {results.map((result) => {
-          return (
-            <li className="dropdown-item" key={result.symbol}>
-              {result.description} ({result.symbol})
-            </li>
-          );
-        })}
-      </ul>
-    );
-  };
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      try {
-        const response = await finnHub.get("/search", {
-          params: {
-            q: search,
-          },
-        });
-        if (isMounted) {
-          setResults(response.data.result);
-        }
-      } catch (error) {}
-    };
-    if (search.length > 0) {
-      fetchData();
-    } else {
-      setResults([]);
-    }
-    return () => (isMounted = false);
-  }, [search]);
+  const { search ,setSearch, renderDropDown} = useGlobalContext();
 
   return (
     <div className="w-50 p-5 rounded mx-auto">

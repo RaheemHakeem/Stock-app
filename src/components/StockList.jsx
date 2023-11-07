@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
 import { BsFillCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
-import finnHub from "../apis/finnHub";
+import { useGlobalContext } from "../contexts/WatchListContext";
+import { useNavigate } from "react-router-dom";
 
 export const StockList = () => {
-  const [stock, setStock] = useState([]);
-  const [watchList, setWatchList] = useState(["GOOGL", "MSFT", "AMZN"]);
+  const { stock, deleteStock } = useGlobalContext();
+  const navigate = useNavigate();
 
   const changeColor = (change) => {
     return change > 0 ? "success" : "danger";
@@ -14,35 +14,10 @@ export const StockList = () => {
     return change > 0 ? <BsFillCaretUpFill /> : <BsFillCaretDownFill />;
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      try {
-        const responses = await Promise.all(
-          watchList.map((stock) => {
-            return finnHub.get("/quote", {
-              params: {
-                symbol: stock,
-              },
-            });
-          })
-        );
-        const data = responses.map((response) => {
-          return {
-            data: response.data,
-            symbol: response.config.params.symbol,
-          };
-        });
-        console.log(data);
-        if (isMounted) {
-          setStock(data);
-        }
-      } catch (error) {}
-    };
-    fetchData();
+  const handleStockSelect = (symbol) => {
+    navigate(`detail/${symbol}`);
+  };
 
-    return () => (isMounted = false);
-  }, []);
   return (
     <div>
       <table className="table hover mt-5">
@@ -61,8 +36,13 @@ export const StockList = () => {
         <tbody>
           {stock.map((stockData) => {
             return (
-              <tr className="table-row" key={stockData.symbol}>
-                <th className="row"> {stockData.symbol} </th>
+              <tr
+                style={{ cursor: "pointer" }}
+                className="table-row"
+                onClick={() => handleStockSelect(stockData.symbol)}
+                key={stockData.symbol}
+              >
+                <th> {stockData.symbol} </th>
                 <td>{stockData.data.c}</td>
                 <td className={`text-${changeColor(stockData.data.d)}`}>
                   {stockData.data.d}
@@ -75,7 +55,18 @@ export const StockList = () => {
                 <td>{stockData.data.h}</td>
                 <td>{stockData.data.l}</td>
                 <td>{stockData.data.o}</td>
-                <td>{stockData.data.pc}</td>
+                <td>
+                  {stockData.data.pc}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteStock(stockData.symbol);
+                    }}
+                    className="btn btn-danger btn-sm ml-3 d-inline-block delete-button"
+                  >
+                    Remove
+                  </button>
+                </td>
               </tr>
             );
           })}
